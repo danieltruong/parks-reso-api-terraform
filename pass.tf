@@ -167,7 +167,7 @@ resource "aws_lambda_permission" "readPassPermission" {
    action        = "lambda:InvokeFunction"
    function_name = aws_lambda_function.readPassLambda.function_name
    principal     = "apigateway.amazonaws.com"
-   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/*/*"
+   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/GET/pass"
 }
 
 resource "aws_lambda_permission" "writePassPermission" {
@@ -175,7 +175,7 @@ resource "aws_lambda_permission" "writePassPermission" {
    action        = "lambda:InvokeFunction"
    function_name = aws_lambda_function.writePassLambda.function_name
    principal     = "apigateway.amazonaws.com"
-   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/*/*"
+   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/POST/pass"
 }
 
 resource "aws_lambda_permission" "deletePassPermission" {
@@ -183,5 +183,51 @@ resource "aws_lambda_permission" "deletePassPermission" {
    action        = "lambda:InvokeFunction"
    function_name = aws_lambda_function.deletePassLambda.function_name
    principal     = "apigateway.amazonaws.com"
-   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/*/*"
+   source_arn = "${aws_api_gateway_rest_api.apiLambda.execution_arn}/*/DELETE/pass"
+}
+
+//CORS
+resource "aws_api_gateway_method" "pass_options_method" {
+    rest_api_id   = aws_api_gateway_rest_api.apiLambda.id
+    resource_id   = aws_api_gateway_resource.passResource.id
+    http_method   = "OPTIONS"
+    authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_response" "pass_options_200" {
+    rest_api_id   = aws_api_gateway_rest_api.apiLambda.id
+    resource_id   = aws_api_gateway_resource.passResource.id
+    http_method   = aws_api_gateway_method.pass_options_method.http_method
+    status_code   = "200"
+    response_models = {
+        "application/json" = "Empty"
+    }
+    response_parameters = {
+        "method.response.header.Access-Control-Allow-Headers" = true,
+        "method.response.header.Access-Control-Allow-Methods" = true,
+        "method.response.header.Access-Control-Allow-Origin" = true
+    }
+    depends_on = [aws_api_gateway_method.pass_options_method]
+}
+
+resource "aws_api_gateway_integration" "pass_options_integration" {
+    rest_api_id   = aws_api_gateway_rest_api.apiLambda.id
+    resource_id   = aws_api_gateway_resource.passResource.id
+    http_method   = aws_api_gateway_method.pass_options_method.http_method
+    type          = "MOCK"
+    depends_on = [aws_api_gateway_method.pass_options_method]
+}
+
+resource "aws_api_gateway_integration_response" "pass_options_integration_response" {
+    rest_api_id   = aws_api_gateway_rest_api.apiLambda.id
+    resource_id   = aws_api_gateway_resource.passResource.id
+    http_method   = aws_api_gateway_method.pass_options_method.http_method
+
+    status_code   = aws_api_gateway_method_response.pass_options_200.status_code
+    response_parameters = {
+        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
+        "method.response.header.Access-Control-Allow-Origin" = "'*'"
+    }
+    depends_on = [aws_api_gateway_method_response.pass_options_200]
 }
