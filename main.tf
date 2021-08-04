@@ -8,7 +8,8 @@ terraform {
 }
 
 provider "aws" {
-   region = "ca-central-1"
+  alias  = "ca"
+  region = "ca-central-1"
 }
 
 // Auto pack lambda function.
@@ -21,7 +22,7 @@ data "archive_file" "readParkZip" {
 // Auto pack lambda function.
 data "archive_file" "writeParkZip" {
     type        = "zip"
-    source_dir  = "../writePark"
+    source_dir  = "../writePark"s
     output_path = "writePark.zip"
 }
 
