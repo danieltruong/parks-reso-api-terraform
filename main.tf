@@ -22,7 +22,7 @@ data "archive_file" "readParkZip" {
 // Auto pack lambda function.
 data "archive_file" "writeParkZip" {
     type        = "zip"
-    source_dir  = "../writePark"s
+    source_dir  = "../writePark"
     output_path = "writePark.zip"
 }
 
