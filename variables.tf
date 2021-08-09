@@ -68,6 +68,6 @@ variable "common_tags" {
   }
 }
 
-variable "s3_bucket" {}
-
-variable "deployEnvironment" {}
+variable "deploy_environment" {
+  description = "deploy environment (dev, test, prod)"
+}
