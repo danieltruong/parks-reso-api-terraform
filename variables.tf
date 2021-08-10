@@ -12,7 +12,6 @@ variable "target_aws_account_id" {
 
 variable "aws_region" {
   description = "The AWS region things are created in"
-  default     = "ca-central-1"
 }
 
 variable "app_name" {
